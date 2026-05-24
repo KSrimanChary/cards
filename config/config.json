@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "celeb-cards-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/celebCards/CelebCardsWebPart.js",
+          "manifest": "./src/webparts/celebCards/CelebCardsWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "CelebCardsWebPartStrings": "lib/webparts/celebCards/loc/{locale}.js"
+  }
+}

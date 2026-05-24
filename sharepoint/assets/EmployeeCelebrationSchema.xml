@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<List xmlns:ows="Microsoft SharePoint"
+      Title="Employee Celebrations"
+      EnableContentTypes="TRUE"
+      FolderCreation="FALSE"
+      Url="Lists/EmployeeCelebrations"
+      BaseType="0"
+      xmlns="http://schemas.microsoft.com/sharepoint/">
+
+  <MetaData>
+
+    <ContentTypes>
+      <ContentTypeRef ID="0x0100AABBCCDDEEFF00112233445566778899" />
+    </ContentTypes>
+
+    <Fields></Fields>
+
+    <Views>
+
+      <View BaseViewID="1"
+            Type="HTML"
+            WebPartZoneID="Main"
+            DisplayName="All Items"
+            DefaultView="TRUE"
+            MobileView="TRUE"
+            MobileDefaultView="TRUE"
+            SetupPath="pages\viewpage.aspx"
+            Url="AllItems.aspx">
+
+        <RowLimit Paged="TRUE">30</RowLimit>
+
+        <Toolbar Type="Standard" />
+
+        <ViewFields>
+          <FieldRef Name="LinkTitle"/>
+          <FieldRef Name="EmployeeEmail"/>
+          <FieldRef Name="EmployeePhoto"/>
+          <FieldRef Name="Designation"/>
+          <FieldRef Name="EventType"/>
+          <FieldRef Name="EventDate"/>
+          <FieldRef Name="IsActive"/>
+          <FieldRef Name="CustomMessage"/>
+          <FieldRef Name="YearsCompleted"/>
+        </ViewFields>
+
+      </View>
+
+    </Views>
+
+    <Forms>
+      <Form Type="DisplayForm"
+            Url="DispForm.aspx"
+            SetupPath="pages\form.aspx"
+            WebPartZoneID="Main" />
+
+      <Form Type="EditForm"
+            Url="EditForm.aspx"
+            SetupPath="pages\form.aspx"
+            WebPartZoneID="Main" />
+
+      <Form Type="NewForm"
+            Url="NewForm.aspx"
+            SetupPath="pages\form.aspx"
+            WebPartZoneID="Main" />
+    </Forms>
+
+  </MetaData>
+
+</List>

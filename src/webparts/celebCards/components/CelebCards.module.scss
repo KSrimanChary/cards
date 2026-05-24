@@ -1,0 +1,571 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.celebCards {
+  overflow: hidden;
+  padding: 1em;
+  color: "[theme:bodyText, default: #323130]";
+  color: var(--bodyText);
+  &.teams {
+    font-family: $ms-font-family-fallbacks;
+  }
+}
+
+.welcome {
+  text-align: center;
+}
+
+.welcomeImage {
+  width: 100%;
+  max-width: 420px;
+}
+
+.links {
+  a {
+    text-decoration: none;
+    color: "[theme:link, default:#03787c]";
+    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
+
+    &:hover {
+      text-decoration: underline;
+      color: "[theme:linkHovered, default: #014446]";
+      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
+    }
+  }
+}
+
+@import '~@fluentui/react/dist/sass/References.scss';
+
+
+$primary-pink: #ff6b9d;
+$light-pink: #ffc0d9;
+$gold: #ffd700;
+$light-gold: #fff8dc;
+$white: #ffffff;
+$dark-gray: #2c3e50;
+
+.celebrationHub {
+  padding: 20px 10px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f0f4f8 100%);
+  border-radius: 20px;
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.headerLeft {
+  flex: 1;
+  min-width: 300px;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 700;
+  color: $primary-pink;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.5px;
+}
+
+.emoji {
+  font-size: 44px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 8px 0 0 0;
+  font-weight: 400;
+}
+
+.counterBadge {
+  background: linear-gradient(135deg, #ff6b9d 0%, #ff1493 100%);
+  color: white;
+  padding: 16px 28px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(255, 107, 157, 0.3);
+  white-space: nowrap;
+}
+
+.counterEmoji {
+  font-size: 24px;
+}
+
+.counterText {
+  font-size: 15px;
+}
+
+.carouselContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.carousel {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 0;
+}
+
+.cardsWrapper {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  overflow: hidden;
+  min-height: 550px;
+}
+
+.cardSlide {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 380px;
+}
+
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.celebrationCard {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.cardBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.bgGradient {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.birthdayCard {
+  .bgGradient {
+    background: linear-gradient(135deg, #ffc0d9 0%, #ffb3d9 50%, #ff99cc 100%);
+  }
+}
+
+.anniversaryCard {
+  .bgGradient {
+    background: linear-gradient(135deg, #fff8dc 0%, #ffe680 50%, #ffd700 100%);
+  }
+}
+
+.balloon {
+  position: absolute;
+  width: 80px;
+  height: 100px;
+  border-radius: 50% 50% 50% 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), transparent);
+  animation: float 6s ease-in-out infinite;
+
+  &:nth-child(1) {
+    background: #ff69b4;
+    left: 10%;
+    top: 10%;
+    animation-delay: 0s;
+  }
+
+  &:nth-child(2) {
+    background: #ffb6c1;
+    right: 15%;
+    top: 20%;
+    animation-delay: 1s;
+  }
+
+  &:nth-child(3) {
+    background: #ffc0cb;
+    left: 20%;
+    bottom: 20%;
+    animation-delay: 2s;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.ribbon {
+  position: absolute;
+  width: 200px;
+  height: 30px;
+  background: linear-gradient(90deg, transparent, #ff1493, transparent);
+  right: -50px;
+  top: 30%;
+  transform: rotate(45deg);
+  opacity: 0.3;
+}
+
+.goldParticle {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.4), transparent);
+  border-radius: 50%;
+  animation: sparkle 4s ease-in-out infinite;
+
+  &:nth-child(1) {
+    top: 10%;
+    right: 10%;
+    animation-delay: 0s;
+  }
+
+  &:nth-child(2) {
+    bottom: 15%;
+    left: 10%;
+    animation-delay: 1.3s;
+  }
+
+  &:nth-child(3) {
+    top: 50%;
+    right: 5%;
+    animation-delay: 2.6s;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+.cardContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 25px;
+  flex: 1;
+}
+
+.cardLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+
+  .birthdayCard & {
+    color: #ff1493;
+  }
+
+  .anniversaryCard & {
+    color: #b8860b;
+  }
+}
+
+.photoContainer {
+  position: relative;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.employeePhoto {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 6px solid $white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.photoGlow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+.nameSection {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.employeeName {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.designation {
+  font-size: 14px;
+  color: #555;
+  margin: 6px 0 0 0;
+  font-weight: 500;
+}
+
+.greeting {
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+  line-height: 1.6;
+  margin: 10px 0 20px 0;
+  font-weight: 500;
+}
+
+.wishButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+  &.birthdayButton {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff1493 100%);
+    color: white;
+    border: 2px solid #ff1493;
+
+    &:hover {
+      box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+    }
+  }
+
+  &.anniversaryButton {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+    color: #b8860b;
+    border: 2px solid #b8860b;
+
+    &:hover {
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+    }
+  }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.05) 0%, rgba(255, 215, 0, 0.05) 100%);
+  border-radius: 20px;
+  min-height: 200px;
+}
+
+.emptyIcon {
+  color: #ff6b9d;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.emptyTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+}
+
+.emptySubtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 30px 0;
+}
+
+.emptyConfetti {
+  font-size: 36px;
+  opacity: 0.5;
+}
+
+.loadingContainer {
+  margin-bottom: 40px;
+}
+
+.navPrev,
+.navNext {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: $white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: $primary-pink;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  z-index: 10;
+
+  &:hover {
+    background: $primary-pink;
+    color: $white;
+    transform: scale(1.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.paginationBullet {
+  width: 12px;
+  height: 12px;
+  background: #ddd;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0 6px;
+  border: none;
+  padding: 0;
+}
+
+.paginationBulletActive {
+  background: $primary-pink;
+  width: 28px;
+  border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+  .celebrationHub {
+    padding: 24px 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .celebrationCard {
+    height: 480px;
+  }
+
+  .employeePhoto {
+    width: 100px;
+    height: 100px;
+  }
+
+  .employeeName {
+    font-size: 22px;
+  }
+
+  .cardsWrapper {
+    min-height: 480px;
+  }
+
+  .cardSlide {
+    min-width: 320px;
+  }
+}
+
+
+.carouselWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  position: relative;
+}
+
+.carouselViewport {
+  width: 420px;
+  overflow: hidden;
+}
+
+.carouselSlide {
+  width: 100%;
+}
+
+.navPrev,
+.navNext {
+  flex-shrink: 0;
+}
+
+.paginationContainer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .carouselViewport {
+    width: 100%;
+  }
+
+  .carouselWrapper {
+    gap: 12px;
+  }
+}
+
+.carouselViewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.carouselTrack {
+  display: flex;
+  gap: 20px;
+}
+
+.carouselItem {
+  flex-shrink: 0;
+  padding: 10px;
+  box-sizing: border-box;
+}
