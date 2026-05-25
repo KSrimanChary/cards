@@ -8,6 +8,8 @@ gulp build
 gulp bundle --ship
 gulp package-solution --ship
 
+
+
 ## Summary
 
 Short summary on functionality and used technologies.

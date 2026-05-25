@@ -3,14 +3,11 @@
   "id": "ae85b7ac-4acf-4715-8f6d-e67c7f14ebf4",
   "alias": "CelebCardsWebPart",
   "componentType": "WebPart",
- 
-  "version": "*",
+  "version": "1.0.0",
   "manifestVersion": 2,
- 
   "requiresCustomScript": false,
-  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportedHosts": ["SharePointWebPart"],
   "supportsThemeVariants": true,
-
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", 
     "group": { "default": "Advanced" },

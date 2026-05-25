@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+    <!-- Field Definitions with Unique GUIDs -->
+    <Field ID="{A7F2B1C3-4D5E-4F6A-8B9C-1D2E3F4A5B6C}" Name="Employee" DisplayName="Employee" Type="User" Group="EmployeeEventsContentType"/>
+    <Field ID="{B8G3C2D4-5E6F-5G7B-9C0D-2E3F4G5B6C7D}" Name="Designation" DisplayName="Designation" Type="Text" Group="EmployeeEventsContentType"/>
+    <Field ID="{C9H4D3E5-6F7G-6H8C-0D1E-3F4G5H6C7D8E}" Name="EventType" DisplayName="Event Type" Type="Choice" Group="EmployeeEventsContentType">
+        <CHOICES>
+            <CHOICE>Anniversary</CHOICE>
+            <CHOICE>Birthday</CHOICE>
+            <CHOICE>Work Anniversary</CHOICE>
+        </CHOICES>
+    </Field>
+    <Field ID="{D0I5E4F6-7G8H-7I9D-1E2F-4G5H6I7D8E9F}" Name="EmployeePhoto" DisplayName="Employee Photo" Type="URL" Group="EmployeeEventsContentType"/>
+    <Field ID="{E1J6F5G7-8H9I-8J0E-2F3G-5H6I7J8E9F0G}" Name="EventDate" DisplayName="Event Date" Type="DateTime" Group="EmployeeEventsContentType"/>
+    <Field ID="{F2K7G6H8-9I0J-9K1F-3G4H-6I7J8K9F0G1H}" Name="CustomMessage" DisplayName="Custom Message" Type="Text" Group="EmployeeEventsContentType"/>
+    <Field ID="{G3L8H7I9-0J1K-0L2G-4H5I-7J8K9L0G1H2I}" Name="DateOfJoin" DisplayName="Date of Join" Type="DateTime" Group="EmployeeEventsContentType"/>
+    <Field ID="{H4M9I8J0-1K2L-1M3H-5I6J-8K9L0M1H2I3J}" Name="IsActive" DisplayName="Is Active" Type="Boolean" Group="EmployeeEventsContentType"/>
+
+    <!-- Content Type Definition with Unique GUID -->
+    <ContentType ID="0x0100A7F2B1C34D5E4F6A8B9C1D2E3F4A5B6C" Name="Employee Celebration" Group="EmployeeEventsContentType" Description="Content type for employee celebration events">
+        <FieldRefs>
+            <FieldRef ID="{A7F2B1C3-4D5E-4F6A-8B9C-1D2E3F4A5B6C}" />
+            <FieldRef ID="{B8G3C2D4-5E6F-5G7B-9C0D-2E3F4G5B6C7D}" />
+            <FieldRef ID="{C9H4D3E5-6F7G-6H8C-0D1E-3F4G5H6C7D8E}" />
+            <FieldRef ID="{D0I5E4F6-7G8H-7I9D-1E2F-4G5H6I7D8E9F}" />
+            <FieldRef ID="{E1J6F5G7-8H9I-8J0E-2F3G-5H6I7J8E9F0G}" />
+            <FieldRef ID="{F2K7G6H8-9I0J-9K1F-3G4H-6I7J8K9F0G1H}" />
+            <FieldRef ID="{G3L8H7I9-0J1K-0L2G-4H5I-7J8K9L0G1H2I}" />
+            <FieldRef ID="{H4M9I8J0-1K2L-1M3H-5I6J-8K9L0M1H2I3J}" />
+        </FieldRefs>
+    </ContentType>
+
+    <!-- List Instance -->
+    <ListInstance CustomSchema="EmployeeCelebrationDetailsSchema.xml" FeatureId="{00bfea71-de22-43b2-a848-c05709900100}" Title="Employee Celebration Details" Description="Employee Celebration Details List" TemplateType="100" Hidden="FALSE" Url="Lists/EmployeeCelebrationDetails">
+    </ListInstance>
+</Elements>

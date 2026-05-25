@@ -3,16 +3,16 @@
   "solution": {
     "name": "celeb-cards-client-side-solution",
     "id": "fa88780c-6b53-483a-9c32-bd52617ac4b8",
-    "version": "1.0.0.5",
+    "version": "1.0.0.10",
     "includeClientSideAssets": true,
-    "skipFeatureDeployment": false,
+    "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "developer": {
       "name": "",
       "websiteUrl": "",
       "privacyUrl": "",
       "termsOfUseUrl": "",
-      "mpnId": "Undefined-1.20.0"
+      "mpnId": ""
     },
     "metadata": {
       "shortDescription": {
@@ -31,9 +31,9 @@
         "description": "The feature that activates elements of the celeb-cards solution.",
         "id": "bdef33b0-d396-4556-9af0-363adb1c200b",
         "version": "1.0.0.0",
-       "assets": {
+        "assets": {
           "elementManifests": [
-            "EmployeeCelebrationElements.xml"
+            "Elements.xml"
           ],
           "elementFiles": [
             "EmployeeCelebrationSchema.xml"

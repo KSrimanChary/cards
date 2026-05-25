@@ -41,10 +41,10 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
       <div className={styles.cardBackground}>
         <div className={styles.bgGradient}></div>
         {isBirthday ? (
-          <>
+          <div>
             <div className={styles.balloon}></div>
             <div className={styles.ribbon}></div>
-          </>
+          </div>
         ) : (
           <div className={styles.goldParticle}></div>
         )}
