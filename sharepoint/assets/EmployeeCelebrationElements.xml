@@ -58,7 +58,7 @@
          Type="Number"
          Group="EmployeeCelebrationContentType" />
 
-  <ContentType ID="0x0100AABBCCDDEEFF00112233445566778899"
+  <ContentType ID="0x0100AABBCCDDEEFF"
                Name="Employee Celebration"
                Group="EmployeeCelebrationContentType">
 

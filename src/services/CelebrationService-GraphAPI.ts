@@ -1,5 +1,5 @@
 import { ServiceKey, ServiceScope } from "@microsoft/sp-core-library";
-import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import { SPHttpClient } from "@microsoft/sp-http";
 import { PageContext } from "@microsoft/sp-page-context";
 import { IEmployeeCelebration } from '../models/IEmployeeCelebration';
 
@@ -13,8 +13,8 @@ export default class CelebrationService implements ICelebrationService {
   public static readonly serviceKey: ServiceKey<ICelebrationService> =
     ServiceKey.create<ICelebrationService>('celebration:ICelebrationService', CelebrationService);
 
-  private _spHttpClient: SPHttpClient;
-  private _pageContext: PageContext;
+  private _spHttpClient!: SPHttpClient;
+  private _pageContext!: PageContext;
   private _listId: string = '';
 
   constructor(serviceScope: ServiceScope) {

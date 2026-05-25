@@ -3,7 +3,7 @@
   "solution": {
     "name": "celeb-cards-client-side-solution",
     "id": "fa88780c-6b53-483a-9c32-bd52617ac4b8",
-    "version": "1.0.0.2",
+    "version": "1.0.0.5",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": false,
     "isDomainIsolated": false,

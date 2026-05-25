@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <List xmlns:ows="Microsoft SharePoint"
       Title="Employee Celebrations"
       EnableContentTypes="TRUE"
       FolderCreation="FALSE"
       Url="Lists/EmployeeCelebrations"
       BaseType="0"
+      Hidden="FALSE"
+      EnableVersioning="TRUE"
+      EnableAttachments="FALSE"
       xmlns="http://schemas.microsoft.com/sharepoint/">
 
   <MetaData>
 
     <ContentTypes>
-      <ContentTypeRef ID="0x0100AABBCCDDEEFF00112233445566778899" />
-    </ContentTypes>
 
-    <Fields></Fields>
+      <ContentTypeRef ID="0x0100AABBCCDDEEFF" />
+
+      <RemoveContentType ID="0x01" />
+
+    </ContentTypes>
 
     <Views>
 
@@ -46,23 +52,6 @@
       </View>
 
     </Views>
-
-    <Forms>
-      <Form Type="DisplayForm"
-            Url="DispForm.aspx"
-            SetupPath="pages\form.aspx"
-            WebPartZoneID="Main" />
-
-      <Form Type="EditForm"
-            Url="EditForm.aspx"
-            SetupPath="pages\form.aspx"
-            WebPartZoneID="Main" />
-
-      <Form Type="NewForm"
-            Url="NewForm.aspx"
-            SetupPath="pages\form.aspx"
-            WebPartZoneID="Main" />
-    </Forms>
 
   </MetaData>
 
