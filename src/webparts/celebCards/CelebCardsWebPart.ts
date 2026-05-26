@@ -77,7 +77,7 @@ protected async onInit(): Promise<void> {
                   label: strings.DescriptionFieldLabel
                 }),
                 PropertyPaneTextField('cardsToShow', {
-                  label: 'Number of cards visible in carousel'
+                  label: 'Number of cards visible in carousel',
                 })
               ]
             }

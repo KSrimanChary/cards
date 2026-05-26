@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 import { FaBirthdayCake, FaTrophy } from 'react-icons/fa';
 import TeamsWishButton from './TeamsWishButton';
 import { IEmployeeCelebration } from '../../../models/IEmployeeCelebration';
+import { BirthdayWishes } from '../../../Constants/BirthdayWishes';
+import { AnniversaryWishes } from '../../../Constants/AnniversaryWishes';
 import styles from './CelebCards.module.scss';
 
 export interface ICelebrationCardProps {
   celebration: IEmployeeCelebration;
-  onWish: (email: string) => void;
+  onWish: (email: string, eventType: string) => void;
   showDesignation?: boolean;
 }
 
@@ -19,15 +21,18 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
   const isBirthday = celebration.EventType === 'Birthday';
   const cardClass = isBirthday ? styles.birthdayCard : styles.anniversaryCard;
 
-
-
-
   const getGreeting = (): string => {
-    if (isBirthday) {
-      return 'Wishing you happiness, success and wonderful memories today.';
+    if (celebration.CustomMessage && celebration.CustomMessage.trim()) {
+      return celebration.CustomMessage;
     }
-    const years = celebration.YearsCompleted || 1;
-    return `Congratulations on completing ${years} wonderful year${years > 1 ? 's' : ''} with the team.`;
+ 
+    if (isBirthday) {
+      return BirthdayWishes.getRandomWish();
+    }
+
+    // const years = celebration.YearsCompleted || 1;
+    // const anniversaryGreeting = `Congratulations on completing ${years} wonderful year${years > 1 ? 's' : ''} with the team.`;
+    return AnniversaryWishes.getRandomWish();
   };
 
   return (
@@ -79,10 +84,10 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
           transition={{ delay: 0.2 }}
         >
           <img
-            src={celebration.EmployeePhoto || 'https://via.placeholder.com/200'}
+            src={celebration.EmployeePhoto || ''}
             alt={celebration.Title}
             className={styles.employeePhoto}
-            onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/200')}
+            onError={(e) => (e.currentTarget.src = '')}
           />
           <div className={styles.photoGlow}></div>
         </motion.div>
@@ -105,7 +110,7 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          {celebration.CustomMessage || getGreeting()}
+          {getGreeting()}
         </motion.p>
 
         <motion.div
@@ -114,7 +119,8 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
           transition={{ delay: 0.5 }}
         >
           <TeamsWishButton
-            email={celebration?.EmployeeEmail}
+            email={celebration?.EmployeeEmail as string }
+            // eventType={celebration.EventType}
             onWish={onWish}
             isBirthday={isBirthday}
           />

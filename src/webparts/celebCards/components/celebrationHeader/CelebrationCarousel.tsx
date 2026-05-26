@@ -9,6 +9,8 @@ import CelebrationCard from '../CelebrationCard';
 import EmptyState from '../EmptyState';
 import CelebrationHeader from './CelebrationHeader';
 import { ICelebrationService } from '../../../../services/CelebrationService-GraphAPI';
+import { AnniversaryWishes } from '../../../../Constants/AnniversaryWishes';
+import { BirthdayWishes } from '../../../../Constants/BirthdayWishes';
 
 
 interface ICelebrationCarouselProps {
@@ -17,7 +19,7 @@ interface ICelebrationCarouselProps {
     celebrationService?: ICelebrationService;
 }
 
-const AUTO_PLAY_INTERVAL = 5000; // 5 seconds
+const AUTO_PLAY_INTERVAL = 2000; 
 
 
 const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
@@ -30,79 +32,114 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
     const [celebrations, setCelebrations] = React.useState<IEmployeeCelebration[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
-    const loadCelebrations = React.useCallback(async () => {
-        try {
-            setIsLoading(true);
-            
-            let data: IEmployeeCelebration[] = [];
 
-            if (celebrationService) {
-                data = await celebrationService.getTodaysCelebrations();
-                console.log(`Loaded ${data.length} celebrations from service`);
-            } else if (context) {
-                // ✅ Fallback to direct API call
-                const listUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebration Details')/items?$select=ID,Title,Designation,Employee_x0020_Photo,Event_x0020_Type,Event_x0020_Date,Is_x0020_Active,Custom_x0020_Message,Date_x0020_of_x0020_Join`;
+    const getUserImage = (item: IEmployeeCelebration, webUrl: string): string => {
+    const email = item.Employee?.Email || item.EmployeeEmail;
+
+    const spUserPhoto = 
+        email
+            ? `${webUrl}/_layouts/15/userphoto.aspx?size=M&username=${email}`
+            : '';
+        return spUserPhoto;
+    };
+
+    // Load celebrations only on mount
+    React.useEffect(() => {
+        const loadCelebrations = async () => {
+            try {
+                setIsLoading(true);
                 
-                const response = await fetch(listUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                let data: IEmployeeCelebration[] = [];
+
+                if (celebrationService) {
+                    data = await celebrationService.getTodaysCelebrations();
+                    console.log(`Loaded ${data.length} celebrations from service`);
+                } else if (context) {
+                    const listUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebration Details')/items?$select=ID,Title,Designation,Employee/Title,Employee/EMail,Employee/Id,Employee_x0020_Photo,Event_x0020_Type,Event_x0020_Date,Is_x0020_Active,Custom_x0020_Message,Date_x0020_of_x0020_Join&$expand=Employee&$filter=Is_x0020_Active eq 1`;
+                    const response = await fetch(listUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json;odata=nometadata',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        console.warn(`List not found or error: ${response.status}`);
+                        data = [];
+                    } else {
+                        const responseData = await response.json();
+                        data = (responseData.value || []).map((item: any) => ({
+                            Id: item.ID,
+                            Title: item.Title || '',
+                            EmployeePhoto: item.Employee_x0020_Photo?.Url || getUserImage(item, context.pageContext.web.absoluteUrl),
+                            Designation: item.Designation || '',
+                            EventType: item.Event_x0020_Type || 'Birthday',
+                            EventDate: item.Event_x0020_Date || new Date().toISOString(),
+                            IsActive: item.Is_x0020_Active ?? true,
+                            CustomMessage: item.Custom_x0020_Message || '',
+                            Employee: item.Employee,
+                            EmployeeEmail: item.Employee?.EMail || '',
+                            YearsCompleted: 0
+                        }));
+                        console.log(`Loaded ${data.length} celebration items`);
                     }
-                });
-
-                if (!response.ok) {
-                    console.warn(`List not found or error: ${response.status}`);
-                    data = [];
-                } else {
-                    const responseData = await response.json();
-                    data = (responseData.value || []).map((item: any) => ({
-                        Id: item.ID,
-                        Title: item.Title || '',
-                        EmployeeEmail: item.Employee || '',
-                        EmployeePhoto: item.Employee_x0020_Photo?.Url || '',
-                        Designation: item.Designation || '',
-                        EventType: item.Event_x0020_Type || 'Birthday',
-                        EventDate: item.Event_x0020_Date || new Date().toISOString(),
-                        IsActive: item.Is_x0020_Active ?? true,
-                        CustomMessage: item.Custom_x0020_Message || '',
-                        YearsCompleted: 0
-                    }));
-                    console.log(`Loaded ${data.length} celebration items`);
                 }
-            }
 
-            setCelebrations(data);
-        } catch (error) {
-            console.error("Error loading celebrations:", error);
-            setCelebrations([]);
-        } finally {
-            setIsLoading(false);
+                setCelebrations(data);
+                setCurrentIndex(0); // Reset index when celebrations load
+            } catch (error) {
+                console.error("Error loading celebrations:", error);
+                setCelebrations([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        void loadCelebrations();
+    }, []); // Empty dependency array - load only on mount
+
+    // Memoize celebrations array to prevent unnecessary re-renders of CelebrationCard components
+    const memoizedCelebrations = React.useMemo(
+        () => celebrations,
+        [celebrations]
+    );
+    const actualCardsToShow = React.useMemo(
+        () => Math.min(memoizedCelebrations.length, cardsToShow) || 1,
+        [memoizedCelebrations.length, cardsToShow]
+    );
+    
+    // Calculate card width percentage based on actual visible cards
+    const cardWidthPercentage = React.useMemo(
+        () => 100 / actualCardsToShow,
+        [actualCardsToShow]
+    );
+
+    // Calculate the maximum slide index we can scroll to
+    const maxSlideIndex = React.useMemo(
+        () => Math.max(0, memoizedCelebrations.length - actualCardsToShow),
+        [memoizedCelebrations.length, actualCardsToShow]
+    );
+
+    // Reset currentIndex if it exceeds maxSlideIndex when cardsToShow changes
+    React.useEffect(() => {
+        if (currentIndex > maxSlideIndex) {
+            setCurrentIndex(Math.max(0, maxSlideIndex));
         }
-    }, [context, celebrationService]);
+    }, [maxSlideIndex, currentIndex]);
 
     const nextSlide = React.useCallback(() => {
         setCurrentIndex((prev) =>
-            prev >= celebrations.length - cardsToShow
-                ? 0
-                : prev + 1
+            prev >= maxSlideIndex ? 0 : prev + 1
         );
-    }, [celebrations.length, cardsToShow]);
+    }, [maxSlideIndex]);
 
     const prevSlide = React.useCallback(() => {
         setCurrentIndex((prev) =>
-            prev === 0
-                ? Math.max(celebrations.length - cardsToShow, 0)
-                : prev - 1
+            prev === 0 ? maxSlideIndex : prev - 1
         );
-    }, [celebrations.length, cardsToShow]);
+    }, [maxSlideIndex]);
 
-    // Load celebrations on mount
-    React.useEffect(() => {
-        void loadCelebrations();
-    }, [loadCelebrations]);
-
-    // Auto-play carousel
     React.useEffect(() => {
         if (isPaused || celebrations.length === 0) return;
 
@@ -113,9 +150,20 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
         return () => clearInterval(timer);
     }, [isPaused, nextSlide, celebrations.length]);
 
-    const handleWish = (email: string): void => {
-        alert(`Wish sent to ${email}`);
-    };
+    const handleWish = React.useCallback((email: string, eventType: string): void => {
+        if (!email) {
+            console.warn('No email address found for sending wishes');
+            alert('Unable to send wishes - email not available');
+            return;
+        }       
+
+        const message =
+            eventType === 'Anniversary' ? AnniversaryWishes.getRandomWish() : BirthdayWishes.getRandomWish();
+        const encodedMessage = encodeURIComponent(message);
+        const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${email}&message=${encodedMessage}`;
+
+        window.open(teamsUrl, '_blank');
+    }, []);
 
     if (isLoading) {
         return <div className={styles.loadingContainer}>Loading celebrations...</div>;
@@ -142,19 +190,19 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                             <motion.div
                                 className={styles.carouselTrack}
                                 animate={{
-                                    x: `-${currentIndex * (100 / cardsToShow)}%`
+                                    x: `-${currentIndex * cardWidthPercentage}%`
                                 }}
                                 transition={{
                                     duration: 0.6,
                                     ease: 'easeInOut'
                                 }}
                             >
-                                {celebrations.map((item) => (
+                                {memoizedCelebrations.map((item) => (
                                     <div
                                         key={item.Id}
                                         className={styles.carouselItem}
                                         style={{
-                                            minWidth: `${100 / cardsToShow}%`
+                                            minWidth: `${cardWidthPercentage}%`
                                         }}
                                     >
                                         <CelebrationCard
@@ -178,7 +226,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
 
                     {celebrations.length > 1 && (
                         <div className={styles.paginationContainer}>
-                            {celebrations.map((_, index) => (
+                            {Array.from({ length: maxSlideIndex + 1 }).map((_, index) => (
                                 <button
                                     key={index}
                                     className={`${styles.paginationBullet} ${currentIndex === index
@@ -186,7 +234,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                                         : ''
                                     }`}
                                     onClick={() => setCurrentIndex(index)}
-                                    aria-label={`Go to slide ${index + 1}`}
+                                    aria-label={`Go to slide group ${index + 1}`}
                                 />
                             ))}
                         </div>

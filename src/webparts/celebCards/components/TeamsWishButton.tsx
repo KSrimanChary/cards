@@ -5,14 +5,14 @@ import styles from './CelebCards.module.scss';
 
 interface ITeamsWishButtonProps {
   email: string | undefined;
-  onWish: (email: string) => void;
+  onWish: (email: string, eventType: string) => void;
   isBirthday: boolean;
 }
 
 const TeamsWishButton: React.FC<ITeamsWishButtonProps> = ({ email, onWish, isBirthday }) => {
-  const handleClick = () => {
+  const handleClick = (): void => {
     if (email) {
-      onWish(email);
+      onWish(email, isBirthday ? 'Birthday' : 'Anniversary');
     }
   };
 

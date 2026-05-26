@@ -57,14 +57,12 @@ export default class CelebrationService implements ICelebrationService {
       const today = new Date();
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const day = String(today.getDate()).padStart(2, '0');
-
-      // ✅ CORRECTED: Use actual field names as they appear in SharePoint
-      // Fields with spaces get encoded as _x0020_ in the API response
+ 
       const response = await this._spHttpClient.get(
-        `${this._pageContext.web.absoluteUrl}/_api/web/lists(guid'${listId}')/items?$select=ID,Title,Designation,Employee_x0020_Photo,Event_x0020_Type,Event_x0020_Date,Is_x0020_Active,Custom_x0020_Message,Date_x0020_of_x0020_Join`,
+        `${this._pageContext.web.absoluteUrl}/_api/web/lists(guid'${listId}')/items?$select=ID,Title,Designation,Employee,Employee_x0020_Photo,Event_x0020_Type,Event_x0020_Date,Is_x0020_Active,Custom_x0020_Message,Date_x0020_of_x0020_Join,Employee/Email&$expand=Employee&$filter=Is_x0020_Active eq 1`,
         SPHttpClient.configurations.v1
       );
-
+      console.log(`API response status: ${response.status}`);
       if (!response.ok) {
         console.error(`Error fetching items: ${response.status}`);
         return [];
@@ -80,12 +78,10 @@ export default class CelebrationService implements ICelebrationService {
       return data.value
         .filter((item: any) => {
           try {
-            // ✅ CORRECTED: Check actual field name with spaces encoded
             if (!item.Is_x0020_Active) {
               return false;
             }
 
-            // ✅ CORRECTED: Use correct field name
             const eventDate = new Date(item.Event_x0020_Date);
             const eventMonth = String(eventDate.getMonth() + 1).padStart(2, '0');
             const eventDay = String(eventDate.getDate()).padStart(2, '0');
@@ -97,8 +93,6 @@ export default class CelebrationService implements ICelebrationService {
           }
         })
         .map((item: any) => {
-          // ✅ CORRECTED: Map response fields to model fields
-          // Handle Employee_x0020_Photo which is an object with Url and Description
           let photoUrl = '';
           if (item.Employee_x0020_Photo) {
             if (typeof item.Employee_x0020_Photo === 'object' && item.Employee_x0020_Photo.Url) {
@@ -111,14 +105,14 @@ export default class CelebrationService implements ICelebrationService {
           return {
             Id: item.ID,
             Title: item.Title || '',
-            EmployeeEmail: item.Employee || '', // ✅ User field returns user info
+            EmployeeEmail: item.Employee?.Email || item.Employee || '', // Extract email from User field or fallback to Employee
             EmployeePhoto: photoUrl, // ✅ URL field returns object with Url property
             Designation: item.Designation || '',
             EventType: item.Event_x0020_Type || 'Birthday',
             EventDate: item.Event_x0020_Date || new Date().toISOString(),
             IsActive: item.Is_x0020_Active ?? true,
             CustomMessage: item.Custom_x0020_Message || '',
-            YearsCompleted: 0, // ✅ This field doesn't exist in current schema
+            Employee: item.Employee, 
           } as IEmployeeCelebration;
         });
     } catch (error) {
