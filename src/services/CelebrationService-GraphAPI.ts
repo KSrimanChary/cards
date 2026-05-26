@@ -50,8 +50,6 @@ export default class CelebrationService implements ICelebrationService {
     }
   }
 
-
-
   public async getTodaysCelebrations(): Promise<IEmployeeCelebration[]> {
     try {
       const listId = await this.getListId();
@@ -60,9 +58,10 @@ export default class CelebrationService implements ICelebrationService {
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const day = String(today.getDate()).padStart(2, '0');
 
-      // Use REST API to query the list with proper CAML query
+      // ✅ CORRECTED: Use actual field names as they appear in SharePoint
+      // Fields with spaces get encoded as _x0020_ in the API response
       const response = await this._spHttpClient.get(
-        `${this._pageContext.web.absoluteUrl}/_api/web/lists(guid'${listId}')/items?$select=ID,Title,EmployeeEmail,EmployeePhoto,Designation,EventType,EventDate,IsActive,CustomMessage,YearsCompleted`,
+        `${this._pageContext.web.absoluteUrl}/_api/web/lists(guid'${listId}')/items?$select=ID,Title,Designation,Employee_x0020_Photo,Event_x0020_Type,Event_x0020_Date,Is_x0020_Active,Custom_x0020_Message,Date_x0020_of_x0020_Join`,
         SPHttpClient.configurations.v1
       );
 
@@ -81,11 +80,13 @@ export default class CelebrationService implements ICelebrationService {
       return data.value
         .filter((item: any) => {
           try {
-            if (!item.IsActive) {
+            // ✅ CORRECTED: Check actual field name with spaces encoded
+            if (!item.Is_x0020_Active) {
               return false;
             }
 
-            const eventDate = new Date(item.EventDate);
+            // ✅ CORRECTED: Use correct field name
+            const eventDate = new Date(item.Event_x0020_Date);
             const eventMonth = String(eventDate.getMonth() + 1).padStart(2, '0');
             const eventDay = String(eventDate.getDate()).padStart(2, '0');
 
@@ -95,18 +96,31 @@ export default class CelebrationService implements ICelebrationService {
             return false;
           }
         })
-        .map((item: any) => ({
-          Id: item.ID,
-          Title: item.Title || '',
-          EmployeeEmail: item.EmployeeEmail || '',
-          EmployeePhoto: item.EmployeePhoto || '',
-          Designation: item.Designation || '',
-          EventType: item.EventType || 'Birthday',
-          EventDate: item.EventDate || new Date().toISOString(),
-          IsActive: item.IsActive ?? true,
-          CustomMessage: item.CustomMessage || '',
-          YearsCompleted: item.YearsCompleted || 0,
-        } as IEmployeeCelebration));
+        .map((item: any) => {
+          // ✅ CORRECTED: Map response fields to model fields
+          // Handle Employee_x0020_Photo which is an object with Url and Description
+          let photoUrl = '';
+          if (item.Employee_x0020_Photo) {
+            if (typeof item.Employee_x0020_Photo === 'object' && item.Employee_x0020_Photo.Url) {
+              photoUrl = item.Employee_x0020_Photo.Url;
+            } else if (typeof item.Employee_x0020_Photo === 'string') {
+              photoUrl = item.Employee_x0020_Photo;
+            }
+          }
+
+          return {
+            Id: item.ID,
+            Title: item.Title || '',
+            EmployeeEmail: item.Employee || '', // ✅ User field returns user info
+            EmployeePhoto: photoUrl, // ✅ URL field returns object with Url property
+            Designation: item.Designation || '',
+            EventType: item.Event_x0020_Type || 'Birthday',
+            EventDate: item.Event_x0020_Date || new Date().toISOString(),
+            IsActive: item.Is_x0020_Active ?? true,
+            CustomMessage: item.Custom_x0020_Message || '',
+            YearsCompleted: 0, // ✅ This field doesn't exist in current schema
+          } as IEmployeeCelebration;
+        });
     } catch (error) {
       console.error('Error fetching celebrations:', error);
       return [];

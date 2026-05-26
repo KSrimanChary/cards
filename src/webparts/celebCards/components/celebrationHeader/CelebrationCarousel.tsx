@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
     motion,
-    // AnimatePresence 
 } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { IEmployeeCelebration } from '../../../../models/IEmployeeCelebration';
@@ -9,92 +8,124 @@ import styles from '../CelebCards.module.scss';
 import CelebrationCard from '../CelebrationCard';
 import EmptyState from '../EmptyState';
 import CelebrationHeader from './CelebrationHeader';
+import { ICelebrationService } from '../../../../services/CelebrationService-GraphAPI';
 
 
 interface ICelebrationCarouselProps {
-    context? : any;
+    context?: any;
     cardsToShow?: number;
+    celebrationService?: ICelebrationService;
 }
 
-const AUTO_PLAY_INTERVAL = 1000;
+const AUTO_PLAY_INTERVAL = 5000; // 5 seconds
 
 
 const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
-    context, cardsToShow = 3
+    context, 
+    cardsToShow = 3,
+    celebrationService
 }) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
     const [isPaused, setIsPaused] = React.useState(false);
-    let _celebrations: IEmployeeCelebration[] = [];
- 
-    const loadCelebrations = async () => {
+    const [celebrations, setCelebrations] = React.useState<IEmployeeCelebration[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+
+    const loadCelebrations = React.useCallback(async () => {
         try {
-          // CORRECTED: Updated list name to match Elements.xml
-          const listUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebration Details')/items`;
-          
-          const response = await fetch(listUrl, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
+            setIsLoading(true);
+            
+            let data: IEmployeeCelebration[] = [];
+
+            if (celebrationService) {
+                data = await celebrationService.getTodaysCelebrations();
+                console.log(`Loaded ${data.length} celebrations from service`);
+            } else if (context) {
+                // ✅ Fallback to direct API call
+                const listUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebration Details')/items?$select=ID,Title,Designation,Employee_x0020_Photo,Event_x0020_Type,Event_x0020_Date,Is_x0020_Active,Custom_x0020_Message,Date_x0020_of_x0020_Join`;
+                
+                const response = await fetch(listUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.warn(`List not found or error: ${response.status}`);
+                    data = [];
+                } else {
+                    const responseData = await response.json();
+                    data = (responseData.value || []).map((item: any) => ({
+                        Id: item.ID,
+                        Title: item.Title || '',
+                        EmployeeEmail: item.Employee || '',
+                        EmployeePhoto: item.Employee_x0020_Photo?.Url || '',
+                        Designation: item.Designation || '',
+                        EventType: item.Event_x0020_Type || 'Birthday',
+                        EventDate: item.Event_x0020_Date || new Date().toISOString(),
+                        IsActive: item.Is_x0020_Active ?? true,
+                        CustomMessage: item.Custom_x0020_Message || '',
+                        YearsCompleted: 0
+                    }));
+                    console.log(`Loaded ${data.length} celebration items`);
+                }
             }
-          });
-    
-          if (!response.ok) {
-            console.warn(`List not found or error: ${response.status}`);
-            console.warn(`Attempted to fetch from: ${listUrl}`);
-            _celebrations = [];
-            return;
-          }
-    
-          const data = await response.json();
-          _celebrations = (data.value || []) as IEmployeeCelebration[];
-          console.log(`Loaded ${_celebrations.length} celebration items`);
-          
+
+            setCelebrations(data);
         } catch (error) {
-          console.error("Error loading celebrations:", error);
-          _celebrations = [];
+            console.error("Error loading celebrations:", error);
+            setCelebrations([]);
+        } finally {
+            setIsLoading(false);
         }
-      }
-    
+    }, [context, celebrationService]);
 
     const nextSlide = React.useCallback(() => {
         setCurrentIndex((prev) =>
-            prev >= _celebrations.length - cardsToShow
+            prev >= celebrations.length - cardsToShow
                 ? 0
                 : prev + 1
         );
-    }, [_celebrations.length, cardsToShow]);
+    }, [celebrations.length, cardsToShow]);
 
-
-    const prevSlide = () => {
+    const prevSlide = React.useCallback(() => {
         setCurrentIndex((prev) =>
             prev === 0
-                ? _celebrations.length - cardsToShow
+                ? Math.max(celebrations.length - cardsToShow, 0)
                 : prev - 1
         );
-    };
-    
+    }, [celebrations.length, cardsToShow]);
+
+    // Load celebrations on mount
     React.useEffect(() => {
-        if (isPaused) return;
-        loadCelebrations();
+        void loadCelebrations();
+    }, [loadCelebrations]);
+
+    // Auto-play carousel
+    React.useEffect(() => {
+        if (isPaused || celebrations.length === 0) return;
+
         const timer = setInterval(() => {
             nextSlide();
         }, AUTO_PLAY_INTERVAL);
 
         return () => clearInterval(timer);
-    }, [isPaused, nextSlide]);
+    }, [isPaused, nextSlide, celebrations.length]);
 
     const handleWish = (email: string): void => {
         alert(`Wish sent to ${email}`);
     };
 
-    
+    if (isLoading) {
+        return <div className={styles.loadingContainer}>Loading celebrations...</div>;
+    }
 
     return (
         <>
-            {_celebrations.length > 0 ? (
+            {celebrations.length > 0 ? (
                 <div className={styles.celebrationHub}>
-                <CelebrationHeader count={_celebrations.length} />
+                    <CelebrationHeader count={celebrations.length} />
                     <div
                         className={styles.carouselWrapper}
                         onMouseEnter={() => setIsPaused(true)}
@@ -103,6 +134,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                         <button
                             className={styles.navPrev}
                             onClick={prevSlide}
+                            aria-label="Previous celebration"
                         >
                             <FaChevronLeft />
                         </button>
@@ -117,7 +149,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                                     ease: 'easeInOut'
                                 }}
                             >
-                                {_celebrations.map((item) => (
+                                {celebrations.map((item) => (
                                     <div
                                         key={item.Id}
                                         className={styles.carouselItem}
@@ -138,23 +170,27 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                         <button
                             className={styles.navNext}
                             onClick={nextSlide}
+                            aria-label="Next celebration"
                         >
                             <FaChevronRight />
                         </button>
                     </div>
 
-                    <div className={styles.paginationContainer}>
-                        {_celebrations.map((_, index) => (
-                            <button
-                                key={index}
-                                className={`${styles.paginationBullet} ${currentIndex === index
+                    {celebrations.length > 1 && (
+                        <div className={styles.paginationContainer}>
+                            {celebrations.map((_, index) => (
+                                <button
+                                    key={index}
+                                    className={`${styles.paginationBullet} ${currentIndex === index
                                         ? styles.paginationBulletActive
                                         : ''
                                     }`}
-                                onClick={() => setCurrentIndex(index)}
-                            />
-                        ))}
-                    </div>
+                                    onClick={() => setCurrentIndex(index)}
+                                    aria-label={`Go to slide ${index + 1}`}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             ) : (
                 <EmptyState />
