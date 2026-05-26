@@ -12,39 +12,71 @@ import CelebrationHeader from './CelebrationHeader';
 
 
 interface ICelebrationCarouselProps {
-    celebrations: IEmployeeCelebration[];
+    context? : any;
     cardsToShow?: number;
 }
 
 const AUTO_PLAY_INTERVAL = 1000;
 
+
 const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
-    celebrations, cardsToShow = 3
+    context, cardsToShow = 3
 }) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
     const [isPaused, setIsPaused] = React.useState(false);
+    let _celebrations: IEmployeeCelebration[] = [];
  
+    const loadCelebrations = async () => {
+        try {
+          // CORRECTED: Updated list name to match Elements.xml
+          const listUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebration Details')/items`;
+          
+          const response = await fetch(listUrl, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+    
+          if (!response.ok) {
+            console.warn(`List not found or error: ${response.status}`);
+            console.warn(`Attempted to fetch from: ${listUrl}`);
+            _celebrations = [];
+            return;
+          }
+    
+          const data = await response.json();
+          _celebrations = (data.value || []) as IEmployeeCelebration[];
+          console.log(`Loaded ${_celebrations.length} celebration items`);
+          
+        } catch (error) {
+          console.error("Error loading celebrations:", error);
+          _celebrations = [];
+        }
+      }
+    
 
     const nextSlide = React.useCallback(() => {
         setCurrentIndex((prev) =>
-            prev >= celebrations.length - cardsToShow
+            prev >= _celebrations.length - cardsToShow
                 ? 0
                 : prev + 1
         );
-    }, [celebrations.length, cardsToShow]);
+    }, [_celebrations.length, cardsToShow]);
 
 
     const prevSlide = () => {
         setCurrentIndex((prev) =>
             prev === 0
-                ? celebrations.length - cardsToShow
+                ? _celebrations.length - cardsToShow
                 : prev - 1
         );
     };
     
     React.useEffect(() => {
         if (isPaused) return;
-
+        loadCelebrations();
         const timer = setInterval(() => {
             nextSlide();
         }, AUTO_PLAY_INTERVAL);
@@ -56,11 +88,13 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
         alert(`Wish sent to ${email}`);
     };
 
+    
+
     return (
         <>
-            {celebrations.length > 0 ? (
+            {_celebrations.length > 0 ? (
                 <div className={styles.celebrationHub}>
-                <CelebrationHeader count={celebrations.length} />
+                <CelebrationHeader count={_celebrations.length} />
                     <div
                         className={styles.carouselWrapper}
                         onMouseEnter={() => setIsPaused(true)}
@@ -83,7 +117,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                                     ease: 'easeInOut'
                                 }}
                             >
-                                {celebrations.map((item) => (
+                                {_celebrations.map((item) => (
                                     <div
                                         key={item.Id}
                                         className={styles.carouselItem}
@@ -110,7 +144,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                     </div>
 
                     <div className={styles.paginationContainer}>
-                        {celebrations.map((_, index) => (
+                        {_celebrations.map((_, index) => (
                             <button
                                 key={index}
                                 className={`${styles.paginationBullet} ${currentIndex === index

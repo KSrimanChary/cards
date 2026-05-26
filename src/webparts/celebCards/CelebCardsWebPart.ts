@@ -6,7 +6,8 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'CelebCardsWebPartStrings';
 import CelebrationCarousel from './components/celebrationHeader/CelebrationCarousel';
-import { IEmployeeCelebration } from '../../models/IEmployeeCelebration';
+import ListProvisioningService from '../../services/ListProvisioningService';
+
 
 export interface ICelebCardsWebPartProps {
   description: string;
@@ -16,52 +17,26 @@ export interface ICelebCardsWebPartProps {
 export default class CelebCardsWebPart
   extends BaseClientSideWebPart<ICelebCardsWebPartProps> {
 
-  private _celebrations: IEmployeeCelebration[] = [];
  
-  protected async onInit(): Promise<void> {
-    await super.onInit();
-    
-    try {
-      await this.loadCelebrations();
-    } catch (error) {
-      console.error("Error during init:", error);
-    }
+protected async onInit(): Promise<void> {
+  await super.onInit();
+
+  try {
+    const provisioningService = new ListProvisioningService(this.context);
+    await provisioningService.ensureList();
+
+  } catch (error) {
+    console.error("Error during list provisioning:", error);
   }
+}
+
  
-  private async loadCelebrations(): Promise<void> {
-    try {
-      const listUrl = `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebrations')/items`;
-      
-      const response = await fetch(listUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        console.warn(`List not found or error: ${response.status}`);
-        this._celebrations = [];
-        return;
-      }
-
-      const data = await response.json();
-      this._celebrations = (data.value || []) as IEmployeeCelebration[];
-      
-      this.render();
-    } catch (error) {
-      console.error("Error loading celebrations:", error);
-      this._celebrations = [];
-      this.render();
-    }
-  }
 
   public render(): void {
     const element = React.createElement(
       CelebrationCarousel,
       {
-        celebrations: this._celebrations,
+        context: this.context,
         cardsToShow: Number(this.properties.cardsToShow) || 3
       }
     );

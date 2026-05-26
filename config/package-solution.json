@@ -3,17 +3,10 @@
   "solution": {
     "name": "celeb-cards-client-side-solution",
     "id": "fa88780c-6b53-483a-9c32-bd52617ac4b8",
-    "version": "1.0.0.10",
+    "version": "1.0.2.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
-    "developer": {
-      "name": "",
-      "websiteUrl": "",
-      "privacyUrl": "",
-      "termsOfUseUrl": "",
-      "mpnId": ""
-    },
     "metadata": {
       "shortDescription": {
         "default": "celeb-cards description"
@@ -24,24 +17,9 @@
       "screenshotPaths": [],
       "videoUrl": "",
       "categories": []
-    },
-    "features": [
-      {
-        "title": "celeb-cards Lists Feature",
-        "description": "The feature that activates elements of the celeb-cards solution.",
-        "id": "bdef33b0-d396-4556-9af0-363adb1c200b",
-        "version": "1.0.0.0",
-        "assets": {
-          "elementManifests": [
-            "Elements.xml"
-          ],
-          "elementFiles": [
-            "EmployeeCelebrationSchema.xml"
-          ]
-        }
-      }
-    ]
+    }
   },
+  
   "paths": {
     "zippedPackage": "solution/celeb-cards.sppkg"
   }

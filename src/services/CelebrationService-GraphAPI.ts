@@ -7,7 +7,7 @@ export interface ICelebrationService {
   getTodaysCelebrations(): Promise<IEmployeeCelebration[]>;
 }
 
-const LIST_NAME = 'EmployeeCelebrations';
+const LIST_NAME = 'Employee Celebration Details';
 
 export default class CelebrationService implements ICelebrationService {
   public static readonly serviceKey: ServiceKey<ICelebrationService> =

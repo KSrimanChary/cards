@@ -10,6 +10,25 @@ gulp package-solution --ship
 
 
 
+FeatureId="{bdef33b0-d396-4556-9af0-363adb1c200b}" 
+
+
+    <!-- Content Type Definition with Unique GUID -->
+    <ContentType ID="0x0100A7F2B1C34D5E4F6A8B9C1D2E3F4A5B6C" Name="Employee Celebration" Group="EmployeeEventsContentType" Description="Content type for employee celebration events">
+        <FieldRefs>
+            <FieldRef ID="{A7F2B1C3-4D5E-4F6A-8B9C-1D2E3F4A5B6C}" />
+            <FieldRef ID="{B8A3C2D4-5E6F-5B7C-9C0D-2E3F4A5B6C7D}" />
+            <FieldRef ID="{C9B4D3E5-6F7A-6C8D-0D1E-3F4A5B6C7D8E}" />
+            <FieldRef ID="{D0C5E4F6-7A8B-7D9E-1E2F-4A5B6C7D8E9F}" />
+            <FieldRef ID="{E1D6F5A7-8B9C-8E0F-2F3A-5B6C7D8E9F0A}" />
+            <FieldRef ID="{F2E7A6B8-9C0D-9F1A-3A4B-6C7D8E9F0A1B}" />
+            <FieldRef ID="{A3F8B7C9-0D1E-0A2B-4B5C-7D8E9F0A1B2C}" />
+            <FieldRef ID="{B4A9C8D0-1E2F-1B3C-5C6D-8E9F0A1B2C3D}" />
+        </FieldRefs>
+    </ContentType>
+
+
+    
 ## Summary
 
 Short summary on functionality and used technologies.
