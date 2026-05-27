@@ -1,9 +1,9 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "ae85b7ac-4acf-4715-8f6d-e67c7f14ebf4",
+  "id": "2aa920fa-e273-4f34-ab5f-da63d0c169df",
   "alias": "CelebCardsWebPart",
   "componentType": "WebPart",
-  "version": "1.0.0",
+  "version": "*",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart","SharePointFullPage"],
@@ -11,11 +11,11 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", 
     "group": { "default": "Advanced" },
-    "title": { "default": "celeb-cards" },
-    "description": { "default": "celeb-cards description" },
+    "title": { "default": "Celebration Cards" },
+    "description": { "default": "Display and manage celebration profile cards" },
     "officeFabricIconFontName": "GiftCard", 
     "properties": {
-      "description": "celeb-cards"
+      "description": "Celebration Cards Web Part"
     }
   }]
 }

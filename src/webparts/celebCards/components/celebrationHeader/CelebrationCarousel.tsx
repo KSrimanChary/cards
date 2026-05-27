@@ -32,17 +32,6 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
     const [celebrations, setCelebrations] = React.useState<IEmployeeCelebration[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
-
-    const getUserImage = (item: IEmployeeCelebration, webUrl: string): string => {
-    const email = item.Employee?.Email || item.EmployeeEmail;
-
-    const spUserPhoto = 
-        email
-            ? `${webUrl}/_layouts/15/userphoto.aspx?size=M&username=${email}`
-            : '';
-        return spUserPhoto;
-    };
-
     // Load celebrations only on mount
     React.useEffect(() => {
         const loadCelebrations = async () => {
@@ -54,36 +43,70 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                 if (celebrationService) {
                     data = await celebrationService.getTodaysCelebrations();
                     console.log(`Loaded ${data.length} celebrations from service`);
-                } else if (context) {
-                    const listUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebration Details')/items?$select=ID,Title,Designation,Employee/Title,Employee/EMail,Employee/Id,Employee_x0020_Photo,Event_x0020_Type,Event_x0020_Date,Is_x0020_Active,Custom_x0020_Message,Date_x0020_of_x0020_Join&$expand=Employee&$filter=Is_x0020_Active eq 1`;
+                } 
+                else if (context) 
+                    {
+                    const listUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebration Details')/RenderListDataAsStream`;
                     const response = await fetch(listUrl, {
-                        method: 'GET',
+                        method: 'POST',
                         headers: {
                             'Accept': 'application/json;odata=nometadata',
                             'Content-Type': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify({
+                            parameters: {
+                                ViewXml: `
+                                    <View>
+                                        <ViewFields>
+                                            <FieldRef Name='ID'/>
+                                            <FieldRef Name='Title'/>
+                                            <FieldRef Name='Designation'/>
+                                            <FieldRef Name='Employee'/>
+                                            <FieldRef Name='Employee_x0020_Photo'/>
+                                            <FieldRef Name='Event_x0020_Type'/>
+                                            <FieldRef Name='Event_x0020_Date'/>
+                                            <FieldRef Name='Is_x0020_Active'/>
+                                            <FieldRef Name='Custom_x0020_Message'/>
+                                        </ViewFields>
+                                        <RowLimit>100</RowLimit>
+                                    </View>`
+                            }
+                        })
                     });
-                    
-                    if (!response.ok) {
-                        console.warn(`List not found or error: ${response.status}`);
-                        data = [];
-                    } else {
-                        const responseData = await response.json();
-                        data = (responseData.value || []).map((item: any) => ({
+
+                    const responseData = await response.json();
+
+                    data = (responseData.Row || [])
+                     .filter((item: any) => item["Is_x0020_Active.value"] === "1")
+                    .map((item: any) => {
+
+                        if(item.Is_x0020_Active === "No"){
+                            // Skip inactive celebrations
+                        }
+                                        
+                        let photoUrl = '';
+
+                        const photo = item.Employee_x0020_Photo;
+
+                        if (photo?.fileName) {
+
+                            photoUrl =
+                                `${context.pageContext.web.absoluteUrl}` +
+                                `/Lists/Employee Celebration Details/Attachments/${item.ID}/${photo.fileName}`;
+                        }
+                            
+                        return {
                             Id: item.ID,
                             Title: item.Title || '',
-                            EmployeePhoto: item.Employee_x0020_Photo?.Url || getUserImage(item, context.pageContext.web.absoluteUrl),
+                            EmployeePhoto: photoUrl,
                             Designation: item.Designation || '',
                             EventType: item.Event_x0020_Type || 'Birthday',
-                            EventDate: item.Event_x0020_Date || new Date().toISOString(),
-                            IsActive: item.Is_x0020_Active ?? true,
+                            EventDate: item.Event_x0020_Date,
+                            IsActive: item.Is_x0020_Active,
                             CustomMessage: item.Custom_x0020_Message || '',
-                            Employee: item.Employee,
-                            EmployeeEmail: item.Employee?.EMail || '',
-                            YearsCompleted: 0
-                        }));
-                        console.log(`Loaded ${data.length} celebration items`);
-                    }
+                            EmployeeEmail : item.Employee?.[0]?.email || '',
+                        };
+                    });
                 }
 
                 setCelebrations(data);
@@ -199,7 +222,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                             >
                                 {memoizedCelebrations.map((item) => (
                                     <div
-                                        key={item.Id}
+                                        key={item?.Id}
                                         className={styles.carouselItem}
                                         style={{
                                             minWidth: `${cardWidthPercentage}%`

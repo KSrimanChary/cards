@@ -1,18 +1,18 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "celeb-cards-client-side-solution",
-    "id": "fa88780c-6b53-483a-9c32-bd52617ac4b8",
-    "version": "1.0.2.0",
+    "name": "celeb-cards-client-side-solution-v2",
+    "id": "45f908a0-06f5-4b3d-b462-e734fad056f3",
+    "version": "1.0.2.1",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "metadata": {
       "shortDescription": {
-        "default": "celeb-cards description"
+        "default": "Celebration Cards Web Part"
       },
       "longDescription": {
-        "default": "celeb-cards description"
+        "default": "Celebration Cards Web Part - Display celebrity profiles and information"
       },
       "screenshotPaths": [],
       "videoUrl": "",

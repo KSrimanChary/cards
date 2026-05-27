@@ -18,12 +18,12 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
   onWish,
   showDesignation = true,
 }) => {
-  const isBirthday = celebration.EventType === 'Birthday';
+  const isBirthday = celebration?.EventType === 'Birthday';
   const cardClass = isBirthday ? styles.birthdayCard : styles.anniversaryCard;
 
   const getGreeting = (): string => {
-    if (celebration.CustomMessage && celebration.CustomMessage.trim()) {
-      return celebration.CustomMessage;
+    if (celebration?.CustomMessage && celebration?.CustomMessage.trim()) {
+      return celebration?.CustomMessage;
     }
  
     if (isBirthday) {
@@ -84,8 +84,8 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
           transition={{ delay: 0.2 }}
         >
           <img
-            src={celebration.EmployeePhoto || ''}
-            alt={celebration.Title}
+            src={celebration?.EmployeePhoto || ''}
+            alt={celebration?.Title}
             className={styles.employeePhoto}
             onError={(e) => (e.currentTarget.src = '')}
           />
@@ -98,9 +98,9 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <h3 className={styles.employeeName}>{celebration.Title}</h3>
+          <h3 className={styles.employeeName}>{celebration?.Title}</h3>
           {showDesignation && (
-            <p className={styles.designation}>{celebration.Designation}</p>
+            <p className={styles.designation}>{celebration?.Designation}</p>
           )}
         </motion.div>
 
