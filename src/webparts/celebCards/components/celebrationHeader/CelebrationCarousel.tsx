@@ -16,8 +16,8 @@ interface ICelebrationCarouselProps {
 }
 
 const AUTO_PLAY_INTERVAL = 3000;
-const CARD_WIDTH = 180; // Card width in pixels
-const CONTAINER_PADDING = 24; // Total padding
+const CARD_WIDTH = 180;
+const CONTAINER_PADDING = 24;
 
 
 const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
@@ -30,6 +30,33 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
     const [isLoading, setIsLoading] = React.useState(true);
     const [containerWidth, setContainerWidth] = React.useState(0);
     const containerRef = React.useRef<HTMLDivElement>(null);
+
+    // Fetch user profile picture from REST API
+    const getUserProfilePicture = async (userEmail: string): Promise<string> => {
+        try {
+            if (!context || !userEmail) return '';
+            
+            const userProfileUrl = `${context.pageContext.web.absoluteUrl}/_api/web/SiteUserInfoList/Items?$filter=EMail eq '${userEmail}'&$select=ID`;
+            const response = await fetch(userProfileUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json;odata=nometadata',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const responseData = await response.json();
+            if (responseData.value && responseData.value.length > 0) {
+                // const userId = responseData.value[0].ID;
+                // Return user profile picture URL
+                return `${context.pageContext.web.absoluteUrl}/_layouts/15/userphoto.aspx?size=M&username=${userEmail}`;
+            }
+            return '';
+        } catch (error) {
+            console.error("Error fetching user profile picture:", error);
+            return '';
+        }
+    };
 
     React.useEffect(() => {
         const loadCelebrations = async () => {
@@ -75,9 +102,14 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                         .map((item: any) => {
                             let photoUrl = '';
                             const photo = item.Employee_x0020_Photo;
+                            
+                            // Use uploaded photo if available
                             if (photo?.fileName) {
                                 photoUrl = `${context.pageContext.web.absoluteUrl}/Lists/Employee Celebration Details/Attachments/${item.ID}/${photo.fileName}`;
                             }
+                            
+                            const employeeEmail = item.Employee?.[0]?.email || '';
+                            
                             return {
                                 Id: item.ID,
                                 Title: item.Title || '',
@@ -87,9 +119,26 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                                 EventDate: item.Event_x0020_Date,
                                 IsActive: item.Is_x0020_Active,
                                 CustomMessage: item.Custom_x0020_Message || '',
-                                EmployeeEmail: item.Employee?.[0]?.email || '',
+                                EmployeeEmail: employeeEmail,
+                                EmployeeId: item.Employee?.[0]?.id || null,
                             };
                         });
+
+                    // Fetch profile pictures for items without photos
+                    const celebrationsWithPhotos = await Promise.all(
+                        data.map(async (item) => {
+                            if (!item.EmployeePhoto && item.EmployeeEmail) {
+                                const profilePhoto = await getUserProfilePicture(item.EmployeeEmail);
+                                return {
+                                    ...item,
+                                    EmployeePhoto: profilePhoto || item.EmployeePhoto,
+                                };
+                            }
+                            return item;
+                        })
+                    );
+
+                    data = celebrationsWithPhotos;
                 }
 
                 setCelebrations(data);
@@ -103,7 +152,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
         };
 
         void loadCelebrations();
-    }, []);
+    }, [context, celebrationService]);
 
     // Measure container width
     React.useEffect(() => {
