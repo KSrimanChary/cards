@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { FaBirthdayCake, FaTrophy } from 'react-icons/fa';
-import TeamsWishButton from './TeamsWishButton';
 import { IEmployeeCelebration } from '../../../models/IEmployeeCelebration';
 import { BirthdayWishes } from '../../../Constants/BirthdayWishes';
 import { AnniversaryWishes } from '../../../Constants/AnniversaryWishes';
-import styles from './CelebCards.module.scss';
 
 export interface ICelebrationCardProps {
   celebration: IEmployeeCelebration;
@@ -19,112 +17,158 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
   showDesignation = true,
 }) => {
   const isBirthday = celebration?.EventType === 'Birthday';
-  const cardClass = isBirthday ? styles.birthdayCard : styles.anniversaryCard;
+  
+  const bgGradient = isBirthday 
+    ? 'linear-gradient(135deg, #ffc0d9 0%, #ffb3d9 50%, #ff99cc 100%)'
+    : 'linear-gradient(135deg, #fff8dc 0%, #ffe680 50%, #ffd700 100%)';
+  
+  const textColor = isBirthday ? '#ff1493' : '#b8860b';
+  const btnGradient = isBirthday
+    ? 'linear-gradient(135deg, #ff6b9d 0%, #ff1493 100%)'
+    : 'linear-gradient(135deg, #ffd700 0%, #ffb700 100%)';
+  const btnColor = isBirthday ? 'white' : '#b8860b';
+  const btnBorder = isBirthday ? '#ff1493' : '#b8860b';
 
   const getGreeting = (): string => {
-    if (celebration?.CustomMessage && celebration?.CustomMessage.trim()) {
-      return celebration?.CustomMessage;
+    if (celebration?.CustomMessage?.trim()) {
+      return celebration.CustomMessage;
     }
- 
-    if (isBirthday) {
-      return BirthdayWishes.getRandomWish();
-    }
-
-    // const years = celebration.YearsCompleted || 1;
-    // const anniversaryGreeting = `Congratulations on completing ${years} wonderful year${years > 1 ? 's' : ''} with the team.`;
-    return AnniversaryWishes.getRandomWish();
+    return isBirthday
+      ? BirthdayWishes.getRandomWish()
+      : AnniversaryWishes.getRandomWish();
   };
 
   return (
-
     <motion.div
-      className={`${styles.celebrationCard} ${cardClass}`}
-      whileHover={{ scale: 1.05, y: -10 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
+      style={{
+        position: 'relative',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        background: bgGradient,
+        width: '180px',
+        height: '340px',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
+      }}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.2 }}
     >
-      <div className={styles.cardBackground}>
-        <div className={styles.bgGradient}></div>
-        {isBirthday ? (
-          <div>
-            <div className={styles.balloon}></div>
-            <div className={styles.ribbon}></div>
-          </div>
-        ) : (
-          <div className={styles.goldParticle}></div>
-        )}
-      </div>
-
-      <div className={styles.cardContent}>
-        <motion.div
-          className={styles.cardLabel}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+      <div style={{
+        position: 'relative',
+        zIndex: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px',
+        flex: 1,
+        gap: '8px',
+      }}>
+        
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontSize: '10px',
+          fontWeight: 700,
+          letterSpacing: '0.5px',
+          color: textColor,
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+        }}>
           {isBirthday ? (
             <>
-              <FaBirthdayCake size={18} />
-              <span>HAPPY BIRTHDAY</span>
-              <FaBirthdayCake size={18} />
+              <FaBirthdayCake size={12} />
+              <span>BIRTHDAY</span>
+              <FaBirthdayCake size={12} />
             </>
           ) : (
             <>
-              <FaTrophy size={18} />
+              <FaTrophy size={12} />
               <span>ANNIVERSARY</span>
-              <FaTrophy size={18} />
+              <FaTrophy size={12} />
             </>
           )}
-        </motion.div>
+        </div>
 
-        <motion.div
-          className={styles.photoContainer}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <img
-            src={celebration?.EmployeePhoto || ''}
-            alt={celebration?.Title}
-            className={styles.employeePhoto}
-            onError={(e) => (e.currentTarget.src = '')}
-          />
-          <div className={styles.photoGlow}></div>
-        </motion.div>
+        <img
+          src={celebration?.EmployeePhoto || ''}
+          alt={celebration?.Title}
+          style={{
+            width: '70px',
+            height: '70px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            border: '4px solid white',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            flexShrink: 0,
+          }}
+          onError={(e) => (e.currentTarget.src = '')}
+        />
 
-        <motion.div
-          className={styles.nameSection}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <h3 className={styles.employeeName}>{celebration?.Title}</h3>
+        <div style={{ textAlign: 'center', minWidth: 0 }}>
+          <h3 style={{
+            fontSize: '13px',
+            fontWeight: 700,
+            color: '#1a1a1a',
+            margin: '0',
+            letterSpacing: '-0.3px',
+            lineHeight: 1.2,
+            wordBreak: 'break-word',
+          }}>
+            {celebration?.Title}
+          </h3>
           {showDesignation && (
-            <p className={styles.designation}>{celebration?.Designation}</p>
+            <p style={{
+              fontSize: '9px',
+              color: '#666',
+              margin: '2px 0 0 0',
+              fontWeight: 500,
+            }}>
+              {celebration?.Designation}
+            </p>
           )}
-        </motion.div>
+        </div>
 
-        <motion.p
-          className={styles.greeting}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
+        <p style={{
+          fontSize: '10px',
+          color: '#333',
+          textAlign: 'center',
+          lineHeight: 1.3,
+          margin: '0',
+          fontWeight: 500,
+          // display: '-webkit-box',
+          // WebkitLineClamp: 2,
+          // WebkitBoxOrient: 'vertical',
+          // overflow: 'hidden',
+        }}>
           {getGreeting()}
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+        <button
+          onClick={() => onWish(celebration?.EmployeeEmail as string, celebration?.EventType)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '6px 14px',
+            border: `2px solid ${btnBorder}`,
+            borderRadius: '50px',
+            fontSize: '10px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            background: btnGradient,
+            color: btnColor,
+            transition: 'all 0.3s',
+            marginTop: 'auto',
+            flexShrink: 0,
+          }}
         >
-          <TeamsWishButton
-            email={celebration?.EmployeeEmail as string }
-            // eventType={celebration.EventType}
-            onWish={onWish}
-            isBirthday={isBirthday}
-          />
-        </motion.div>
+          💬 Wish
+        </button>
       </div>
     </motion.div>
   );

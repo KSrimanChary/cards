@@ -11,7 +11,6 @@ import ListProvisioningService from '../../services/ListProvisioningService';
 
 export interface ICelebCardsWebPartProps {
   description: string;
-  cardsToShow: number;
 }
 
 export default class CelebCardsWebPart
@@ -36,8 +35,7 @@ protected async onInit(): Promise<void> {
     const element = React.createElement(
       CelebrationCarousel,
       {
-        context: this.context,
-        cardsToShow: Number(this.properties.cardsToShow) || 3
+        context: this.context
       }
     );
 
@@ -75,9 +73,6 @@ protected async onInit(): Promise<void> {
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
-                }),
-                PropertyPaneTextField('cardsToShow', {
-                  label: 'Number of cards visible in carousel',
                 })
               ]
             }

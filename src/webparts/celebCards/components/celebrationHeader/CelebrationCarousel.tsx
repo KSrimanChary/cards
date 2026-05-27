@@ -1,30 +1,25 @@
 import * as React from 'react';
-import {
-    motion,
-} from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { IEmployeeCelebration } from '../../../../models/IEmployeeCelebration';
-import styles from '../CelebCards.module.scss';
 import CelebrationCard from '../CelebrationCard';
 import EmptyState from '../EmptyState';
-import CelebrationHeader from './CelebrationHeader';
 import { ICelebrationService } from '../../../../services/CelebrationService-GraphAPI';
 import { AnniversaryWishes } from '../../../../Constants/AnniversaryWishes';
 import { BirthdayWishes } from '../../../../Constants/BirthdayWishes';
+import styles from '../CelebCards.module.scss';
 
 
 interface ICelebrationCarouselProps {
     context?: any;
-    cardsToShow?: number;
     celebrationService?: ICelebrationService;
 }
 
-const AUTO_PLAY_INTERVAL = 2000; 
+const AUTO_PLAY_INTERVAL = 3000;
 
 
 const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
-    context, 
-    cardsToShow = 3,
+    context,
     celebrationService
 }) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -32,20 +27,16 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
     const [celebrations, setCelebrations] = React.useState<IEmployeeCelebration[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
 
-    // Load celebrations only on mount
     React.useEffect(() => {
         const loadCelebrations = async () => {
             try {
                 setIsLoading(true);
-                
                 let data: IEmployeeCelebration[] = [];
 
                 if (celebrationService) {
                     data = await celebrationService.getTodaysCelebrations();
-                    console.log(`Loaded ${data.length} celebrations from service`);
                 } 
-                else if (context) 
-                    {
+                else if (context) {
                     const listUrl = `${context.pageContext.web.absoluteUrl}/_api/web/lists/getByTitle('Employee Celebration Details')/RenderListDataAsStream`;
                     const response = await fetch(listUrl, {
                         method: 'POST',
@@ -75,42 +66,30 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                     });
 
                     const responseData = await response.json();
-
                     data = (responseData.Row || [])
-                     .filter((item: any) => item["Is_x0020_Active.value"] === "1")
-                    .map((item: any) => {
-
-                        if(item.Is_x0020_Active === "No"){
-                            // Skip inactive celebrations
-                        }
-                                        
-                        let photoUrl = '';
-
-                        const photo = item.Employee_x0020_Photo;
-
-                        if (photo?.fileName) {
-
-                            photoUrl =
-                                `${context.pageContext.web.absoluteUrl}` +
-                                `/Lists/Employee Celebration Details/Attachments/${item.ID}/${photo.fileName}`;
-                        }
-                            
-                        return {
-                            Id: item.ID,
-                            Title: item.Title || '',
-                            EmployeePhoto: photoUrl,
-                            Designation: item.Designation || '',
-                            EventType: item.Event_x0020_Type || 'Birthday',
-                            EventDate: item.Event_x0020_Date,
-                            IsActive: item.Is_x0020_Active,
-                            CustomMessage: item.Custom_x0020_Message || '',
-                            EmployeeEmail : item.Employee?.[0]?.email || '',
-                        };
-                    });
+                        .filter((item: any) => item["Is_x0020_Active.value"] === "1")
+                        .map((item: any) => {
+                            let photoUrl = '';
+                            const photo = item.Employee_x0020_Photo;
+                            if (photo?.fileName) {
+                                photoUrl = `${context.pageContext.web.absoluteUrl}/Lists/Employee Celebration Details/Attachments/${item.ID}/${photo.fileName}`;
+                            }
+                            return {
+                                Id: item.ID,
+                                Title: item.Title || '',
+                                EmployeePhoto: photoUrl,
+                                Designation: item.Designation || '',
+                                EventType: item.Event_x0020_Type || 'Birthday',
+                                EventDate: item.Event_x0020_Date,
+                                IsActive: item.Is_x0020_Active,
+                                CustomMessage: item.Custom_x0020_Message || '',
+                                EmployeeEmail: item.Employee?.[0]?.email || '',
+                            };
+                        });
                 }
 
                 setCelebrations(data);
-                setCurrentIndex(0); // Reset index when celebrations load
+                setCurrentIndex(0);
             } catch (error) {
                 console.error("Error loading celebrations:", error);
                 setCelebrations([]);
@@ -120,114 +99,95 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
         };
 
         void loadCelebrations();
-    }, []); // Empty dependency array - load only on mount
+    }, []);
 
-    // Memoize celebrations array to prevent unnecessary re-renders of CelebrationCard components
     const memoizedCelebrations = React.useMemo(
         () => celebrations,
         [celebrations]
     );
-    const actualCardsToShow = React.useMemo(
-        () => Math.min(memoizedCelebrations.length, cardsToShow) || 1,
-        [memoizedCelebrations.length, cardsToShow]
-    );
-    
-    // Calculate card width percentage based on actual visible cards
-    const cardWidthPercentage = React.useMemo(
-        () => 100 / actualCardsToShow,
-        [actualCardsToShow]
-    );
 
-    // Calculate the maximum slide index we can scroll to
-    const maxSlideIndex = React.useMemo(
-        () => Math.max(0, memoizedCelebrations.length - actualCardsToShow),
-        [memoizedCelebrations.length, actualCardsToShow]
-    );
-
-    // Reset currentIndex if it exceeds maxSlideIndex when cardsToShow changes
     React.useEffect(() => {
-        if (currentIndex > maxSlideIndex) {
-            setCurrentIndex(Math.max(0, maxSlideIndex));
+        if (currentIndex >= memoizedCelebrations.length) {
+            setCurrentIndex(0);
         }
-    }, [maxSlideIndex, currentIndex]);
+    }, [memoizedCelebrations.length, currentIndex]);
 
     const nextSlide = React.useCallback(() => {
         setCurrentIndex((prev) =>
-            prev >= maxSlideIndex ? 0 : prev + 1
+            prev >= memoizedCelebrations.length - 1 ? 0 : prev + 1
         );
-    }, [maxSlideIndex]);
+    }, [memoizedCelebrations.length]);
 
     const prevSlide = React.useCallback(() => {
         setCurrentIndex((prev) =>
-            prev === 0 ? maxSlideIndex : prev - 1
+            prev === 0 ? memoizedCelebrations.length - 1 : prev - 1
         );
-    }, [maxSlideIndex]);
+    }, [memoizedCelebrations.length]);
 
     React.useEffect(() => {
-        if (isPaused || celebrations.length === 0) return;
+        if (isPaused || memoizedCelebrations.length <= 1) return;
 
         const timer = setInterval(() => {
             nextSlide();
         }, AUTO_PLAY_INTERVAL);
 
         return () => clearInterval(timer);
-    }, [isPaused, nextSlide, celebrations.length]);
+    }, [isPaused, nextSlide, memoizedCelebrations.length]);
 
     const handleWish = React.useCallback((email: string, eventType: string): void => {
         if (!email) {
-            console.warn('No email address found for sending wishes');
             alert('Unable to send wishes - email not available');
             return;
-        }       
-
-        const message =
-            eventType === 'Anniversary' ? AnniversaryWishes.getRandomWish() : BirthdayWishes.getRandomWish();
+        }
+        const message = eventType === 'Anniversary' 
+            ? AnniversaryWishes.getRandomWish() 
+            : BirthdayWishes.getRandomWish();
         const encodedMessage = encodeURIComponent(message);
         const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${email}&message=${encodedMessage}`;
-
         window.open(teamsUrl, '_blank');
     }, []);
 
     if (isLoading) {
-        return <div className={styles.loadingContainer}>Loading celebrations...</div>;
+        return <div className={styles.loadingText}>Loading celebrations...</div>;
     }
 
     return (
         <>
-            {celebrations.length > 0 ? (
-                <div className={styles.celebrationHub}>
-                    <CelebrationHeader count={celebrations.length} />
-                    <div
+            {memoizedCelebrations.length > 0 ? (
+                <div className={styles.celebrationContainer}>
+                    <div className={styles.headerSection}>
+                        <div className={styles.headerLeft}>
+                            <h2 className={styles.headerTitle}>🎉 Today's Celebrations</h2>
+                            <p className={styles.headerSubtitle}>Let's make their day special 💜</p>
+                        </div>
+                        <div className={styles.counterBadge}>
+                            🎊 {memoizedCelebrations.length} Celebration{memoizedCelebrations.length !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+
+                    <div 
                         className={styles.carouselWrapper}
                         onMouseEnter={() => setIsPaused(true)}
                         onMouseLeave={() => setIsPaused(false)}
                     >
-                        <button
-                            className={styles.navPrev}
-                            onClick={prevSlide}
-                            aria-label="Previous celebration"
-                        >
-                            <FaChevronLeft />
-                        </button>
+                        {memoizedCelebrations.length > 1 && (
+                            <button 
+                                className={styles.navButton}
+                                onClick={prevSlide}
+                                aria-label="Previous"
+                            >
+                                <FaChevronLeft size={14} />
+                            </button>
+                        )}
+
                         <div className={styles.carouselViewport}>
                             <motion.div
                                 className={styles.carouselTrack}
-                                animate={{
-                                    x: `-${currentIndex * cardWidthPercentage}%`
-                                }}
-                                transition={{
-                                    duration: 0.6,
-                                    ease: 'easeInOut'
-                                }}
+                                animate={{ x: `-${currentIndex * 100}%` }}
+                                transition={{ duration: 0.5, ease: 'easeInOut' }}
                             >
                                 {memoizedCelebrations.map((item) => (
-                                    <div
-                                        key={item?.Id}
-                                        className={styles.carouselItem}
-                                        style={{
-                                            minWidth: `${cardWidthPercentage}%`
-                                        }}
-                                    >
+                                    <div key={item?.Id} className={styles.carouselItem}>
                                         <CelebrationCard
                                             celebration={item}
                                             onWish={handleWish}
@@ -238,26 +198,24 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                             </motion.div>
                         </div>
 
-                        <button
-                            className={styles.navNext}
-                            onClick={nextSlide}
-                            aria-label="Next celebration"
-                        >
-                            <FaChevronRight />
-                        </button>
+                        {memoizedCelebrations.length > 1 && (
+                            <button 
+                                className={styles.navButton}
+                                onClick={nextSlide}
+                                aria-label="Next"
+                            >
+                                <FaChevronRight size={14} />
+                            </button>
+                        )}
                     </div>
 
-                    {celebrations.length > 1 && (
+                    {memoizedCelebrations.length > 1 && (
                         <div className={styles.paginationContainer}>
-                            {Array.from({ length: maxSlideIndex + 1 }).map((_, index) => (
+                            {memoizedCelebrations.map((_, index) => (
                                 <button
                                     key={index}
-                                    className={`${styles.paginationBullet} ${currentIndex === index
-                                        ? styles.paginationBulletActive
-                                        : ''
-                                    }`}
+                                    className={`${styles.paginationDot} ${currentIndex === index ? styles.active : ''}`}
                                     onClick={() => setCurrentIndex(index)}
-                                    aria-label={`Go to slide group ${index + 1}`}
                                 />
                             ))}
                         </div>
