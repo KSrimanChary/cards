@@ -169,11 +169,10 @@ export default class ListProvisioningService {
     try {
       const fieldXml = `<Field Type="Choice" DisplayName="Event Type" Name="EventType" StaticName="EventType" Required="FALSE" Format="Dropdown">
         <CHOICES>
-          <CHOICE>Anniversary</CHOICE>
           <CHOICE>Birthday</CHOICE>
           <CHOICE>Work Anniversary</CHOICE>
-        </CHOICES>
-        <Default>Anniversary</Default>
+          </CHOICES>
+        <Default>Birthday</Default>
       </Field>`;
 
       const res = await this.context.spHttpClient.post(
@@ -215,6 +214,7 @@ export default class ListProvisioningService {
           Name="EmployeePhoto"
           StaticName="EmployeePhoto"
           Group="Custom Columns"
+          required="TRUE"
         />
       `;
 

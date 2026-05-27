@@ -16,6 +16,8 @@ interface ICelebrationCarouselProps {
 }
 
 const AUTO_PLAY_INTERVAL = 3000;
+const CARD_WIDTH = 180; // Card width in pixels
+const CONTAINER_PADDING = 24; // Total padding
 
 
 const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
@@ -26,6 +28,8 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
     const [isPaused, setIsPaused] = React.useState(false);
     const [celebrations, setCelebrations] = React.useState<IEmployeeCelebration[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [containerWidth, setContainerWidth] = React.useState(0);
+    const containerRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         const loadCelebrations = async () => {
@@ -101,10 +105,34 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
         void loadCelebrations();
     }, []);
 
+    // Measure container width
+    React.useEffect(() => {
+        const handleResize = () => {
+            if (containerRef.current) {
+                setContainerWidth(containerRef.current.offsetWidth);
+            }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const memoizedCelebrations = React.useMemo(
         () => celebrations,
         [celebrations]
     );
+
+    // Calculate how many cards can fit
+    const cardsPerRow = React.useMemo(() => {
+        if (containerWidth === 0) return 1;
+        const availableWidth = containerWidth - CONTAINER_PADDING;
+        const fit = Math.floor(availableWidth / CARD_WIDTH);
+        return Math.max(1, fit);
+    }, [containerWidth]);
+
+    // Determine if carousel is needed
+    const needsCarousel = memoizedCelebrations.length > cardsPerRow;
 
     React.useEffect(() => {
         if (currentIndex >= memoizedCelebrations.length) {
@@ -125,14 +153,14 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
     }, [memoizedCelebrations.length]);
 
     React.useEffect(() => {
-        if (isPaused || memoizedCelebrations.length <= 1) return;
+        if (isPaused || memoizedCelebrations.length <= 1 || !needsCarousel) return;
 
         const timer = setInterval(() => {
             nextSlide();
         }, AUTO_PLAY_INTERVAL);
 
         return () => clearInterval(timer);
-    }, [isPaused, nextSlide, memoizedCelebrations.length]);
+    }, [isPaused, nextSlide, memoizedCelebrations.length, needsCarousel]);
 
     const handleWish = React.useCallback((email: string, eventType: string): void => {
         if (!email) {
@@ -154,7 +182,7 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
     return (
         <>
             {memoizedCelebrations.length > 0 ? (
-                <div className={styles.celebrationContainer}>
+                <div className={styles.celebrationContainer} ref={containerRef}>
                     <div className={styles.headerSection}>
                         <div className={styles.headerLeft}>
                             <h2 className={styles.headerTitle}>🎉 Today's Celebrations</h2>
@@ -165,60 +193,74 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
                         </div>
                     </div>
 
-                    <div 
-                        className={styles.carouselWrapper}
-                        onMouseEnter={() => setIsPaused(true)}
-                        onMouseLeave={() => setIsPaused(false)}
-                    >
-                        {memoizedCelebrations.length > 1 && (
-                            <button 
-                                className={styles.navButton}
-                                onClick={prevSlide}
-                                aria-label="Previous"
-                            >
-                                <FaChevronLeft size={14} />
-                            </button>
-                        )}
-
-                        <div className={styles.carouselViewport}>
-                            <motion.div
-                                className={styles.carouselTrack}
-                                animate={{ x: `-${currentIndex * 100}%` }}
-                                transition={{ duration: 0.5, ease: 'easeInOut' }}
-                            >
-                                {memoizedCelebrations.map((item) => (
-                                    <div key={item?.Id} className={styles.carouselItem}>
-                                        <CelebrationCard
-                                            celebration={item}
-                                            onWish={handleWish}
-                                            showDesignation={true}
-                                        />
-                                    </div>
-                                ))}
-                            </motion.div>
-                        </div>
-
-                        {memoizedCelebrations.length > 1 && (
-                            <button 
-                                className={styles.navButton}
-                                onClick={nextSlide}
-                                aria-label="Next"
-                            >
-                                <FaChevronRight size={14} />
-                            </button>
-                        )}
-                    </div>
-
-                    {memoizedCelebrations.length > 1 && (
-                        <div className={styles.paginationContainer}>
-                            {memoizedCelebrations.map((_, index) => (
-                                <button
-                                    key={index}
-                                    className={`${styles.paginationDot} ${currentIndex === index ? styles.active : ''}`}
-                                    onClick={() => setCurrentIndex(index)}
-                                />
+                    {/* Grid Layout - Show all cards that fit */}
+                    {!needsCarousel && (
+                        <div className={styles.gridContainer}>
+                            {memoizedCelebrations.map((item) => (
+                                <div key={item?.Id} className={styles.gridItem}>
+                                    <CelebrationCard
+                                        celebration={item}
+                                        onWish={handleWish}
+                                        showDesignation={true}
+                                    />
+                                </div>
                             ))}
                         </div>
+                    )}
+
+                    {/* Carousel Layout - Only when cards overflow */}
+                    {needsCarousel && (
+                        <>
+                            <div 
+                                className={styles.carouselWrapper}
+                                onMouseEnter={() => setIsPaused(true)}
+                                onMouseLeave={() => setIsPaused(false)}
+                            >
+                                <button 
+                                    className={styles.navButton}
+                                    onClick={prevSlide}
+                                    aria-label="Previous"
+                                >
+                                    <FaChevronLeft size={14} />
+                                </button>
+
+                                <div className={styles.carouselViewport}>
+                                    <motion.div
+                                        className={styles.carouselTrack}
+                                        animate={{ x: `-${currentIndex * 100}%` }}
+                                        transition={{ duration: 0.5, ease: 'easeInOut' }}
+                                    >
+                                        {memoizedCelebrations.map((item) => (
+                                            <div key={item?.Id} className={styles.carouselItem}>
+                                                <CelebrationCard
+                                                    celebration={item}
+                                                    onWish={handleWish}
+                                                    showDesignation={true}
+                                                />
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                </div>
+
+                                <button 
+                                    className={styles.navButton}
+                                    onClick={nextSlide}
+                                    aria-label="Next"
+                                >
+                                    <FaChevronRight size={14} />
+                                </button>
+                            </div>
+
+                            <div className={styles.paginationContainer}>
+                                {memoizedCelebrations.map((_, index) => (
+                                    <button
+                                        key={index}
+                                        className={`${styles.paginationDot} ${currentIndex === index ? styles.active : ''}`}
+                                        onClick={() => setCurrentIndex(index)}
+                                    />
+                                ))}
+                            </div>
+                        </>
                     )}
                 </div>
             ) : (

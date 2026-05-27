@@ -50,6 +50,7 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
+        flexShrink: 0,
       }}
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
@@ -65,6 +66,9 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
         padding: '12px',
         flex: 1,
         gap: '8px',
+        width: '100%',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}>
         
         <div style={{
@@ -77,6 +81,7 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
           color: textColor,
           flexWrap: 'wrap',
           justifyContent: 'center',
+          width: '100%',
         }}>
           {isBirthday ? (
             <>
@@ -108,7 +113,7 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
           onError={(e) => (e.currentTarget.src = '')}
         />
 
-        <div style={{ textAlign: 'center', minWidth: 0 }}>
+        <div style={{ textAlign: 'center', minWidth: 0, width: '100%' }}>
           <h3 style={{
             fontSize: '13px',
             fontWeight: 700,
@@ -117,6 +122,8 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
             letterSpacing: '-0.3px',
             lineHeight: 1.2,
             wordBreak: 'break-word',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}>
             {celebration?.Title}
           </h3>
@@ -126,6 +133,8 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
               color: '#666',
               margin: '2px 0 0 0',
               fontWeight: 500,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}>
               {celebration?.Designation}
             </p>
@@ -139,10 +148,7 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
           lineHeight: 1.3,
           margin: '0',
           fontWeight: 500,
-          // display: '-webkit-box',
-          // WebkitLineClamp: 2,
-          // WebkitBoxOrient: 'vertical',
-          // overflow: 'hidden',
+          width: '100%',
         }}>
           {getGreeting()}
         </p>
@@ -165,6 +171,9 @@ const CelebrationCard: React.FC<ICelebrationCardProps> = ({
             transition: 'all 0.3s',
             marginTop: 'auto',
             flexShrink: 0,
+            width: '100%',
+            boxSizing: 'border-box',
+            maxWidth: '140px',
           }}
         >
           💬 Wish
