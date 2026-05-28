@@ -63,6 +63,10 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
             try {
                 setIsLoading(true);
                 let data: IEmployeeCelebration[] = [];
+                
+                const today = new Date();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
 
                 if (celebrationService) {
                     data = await celebrationService.getTodaysCelebrations();
@@ -98,7 +102,22 @@ const CelebrationCarousel: React.FC<ICelebrationCarouselProps> = ({
 
                     const responseData = await response.json();
                     data = (responseData.Row || [])
-                        .filter((item: any) => item["Is_x0020_Active.value"] === "1")
+                    .filter((item: any) => {
+                            try {
+                                if (!item.Is_x0020_Active) {
+                                return false;
+                                }
+
+                                const eventDate = new Date(item.Event_x0020_Date);
+                                const eventMonth = String(eventDate.getMonth() + 1).padStart(2, '0');
+                                const eventDay = String(eventDate.getDate()).padStart(2, '0');
+
+                                return eventMonth === month && eventDay === day;
+                            } catch (error) {
+                                console.warn('Error filtering item:', error);
+                                return false;
+                            }
+                        })
                         .map((item: any) => {
                             let photoUrl = '';
                             const photo = item.Employee_x0020_Photo;

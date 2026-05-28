@@ -59,27 +59,31 @@ export default class ListProvisioningService {
       {
         Title: "Designation",
         InternalName: "Designation",
-        FieldTypeKind: 2 // Text
+        FieldTypeKind: 2, // Text
+        Required: true
       },
       {
         Title: "Event Date",
         InternalName: "EventDate",
-        FieldTypeKind: 4 // DateTime
+        FieldTypeKind: 4, // DateTime
+        Required: true
       },
       {
         Title: "Custom Message",
         InternalName: "CustomMessage",
-        FieldTypeKind: 2 // Text
+        FieldTypeKind: 2, // Text
+        Required: false
       },
       {
         Title: "Date of Join",
         InternalName: "DateOfJoin",
-        FieldTypeKind: 4 // DateTime
+        FieldTypeKind: 4, // DateTime
       },
       {
         Title: "Is Active",
         InternalName: "IsActive",
-        FieldTypeKind: 8 // Boolean
+        FieldTypeKind: 8, // Boolean
+        Required: false
       }
     ];
 
@@ -105,7 +109,7 @@ export default class ListProvisioningService {
         Title: field.Title,
         InternalName: field.InternalName,
         FieldTypeKind: field.FieldTypeKind,
-        Required: false,
+        Required: field.Required || false,
         CanBeDeleted: true
       };
 
@@ -135,7 +139,7 @@ export default class ListProvisioningService {
 
   private async createUserFieldXml(listUrl: string): Promise<void> {
     try {
-      const fieldXml = `<Field Type="User" DisplayName="Employee" Name="Employee" StaticName="Employee" UserSelectionMode="PeopleOnly" />`;
+      const fieldXml = `<Field Type="User" DisplayName="Employee" Name="Employee" StaticName="Employee" UserSelectionMode="PeopleOnly" Required="TRUE"/>`;
 
       const res = await this.context.spHttpClient.post(
         `${listUrl}/fields/CreateFieldAsXml`,
@@ -167,7 +171,7 @@ export default class ListProvisioningService {
 
   private async createChoiceFieldXml(listUrl: string): Promise<void> {
     try {
-      const fieldXml = `<Field Type="Choice" DisplayName="Event Type" Name="EventType" StaticName="EventType" Required="FALSE" Format="Dropdown">
+      const fieldXml = `<Field Type="Choice" DisplayName="Event Type" Name="EventType" StaticName="EventType" Required="TRUE" Format="Dropdown">
         <CHOICES>
           <CHOICE>Birthday</CHOICE>
           <CHOICE>Work Anniversary</CHOICE>
@@ -214,7 +218,7 @@ export default class ListProvisioningService {
           Name="EmployeePhoto"
           StaticName="EmployeePhoto"
           Group="Custom Columns"
-          required="TRUE"
+          Required="FALSE"
         />
       `;
 
